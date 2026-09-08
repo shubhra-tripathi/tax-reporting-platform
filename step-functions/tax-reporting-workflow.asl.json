@@ -1,0 +1,57 @@
+{
+  "Comment": "Tax reporting workflow orchestration",
+  "StartAt": "Check Ingestion Status",
+  "States": {
+    "Check Ingestion Status": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.status",
+          "StringEquals": "ACCEPTED",
+          "Next": "Prepare Compaction"
+        }
+      ],
+      "Default": "Rejected Feed"
+    },
+    "Prepare Compaction": {
+      "Type": "Pass",
+      "Result": {
+        "stage": "COMPACTION_READY"
+      },
+      "ResultPath": "$.compaction",
+      "Next": "Prepare Join"
+    },
+    "Prepare Join": {
+      "Type": "Pass",
+      "Result": {
+        "stage": "JOIN_READY"
+      },
+      "ResultPath": "$.join",
+      "Next": "Prepare Enrichment"
+    },
+    "Prepare Enrichment": {
+      "Type": "Pass",
+      "Result": {
+        "stage": "ENRICHMENT_READY"
+      },
+      "ResultPath": "$.enrichment",
+      "Next": "Prepare Report"
+    },
+    "Prepare Report": {
+      "Type": "Pass",
+      "Result": {
+        "stage": "REPORT_READY"
+      },
+      "ResultPath": "$.report",
+      "Next": "Workflow Succeeded"
+    },
+    "Rejected Feed": {
+      "Type": "Fail",
+      "Error": "FeedRejected",
+      "Cause": "The ingestion Lambda rejected the feed"
+    },
+    "Workflow Succeeded": {
+      "Type": "Succeed"
+    }
+  }
+}
