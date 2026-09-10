@@ -11,32 +11,39 @@ import java.util.UUID;
 public class IngestionHandler
         implements RequestHandler<S3Event, IngestionResult> {
 
-    private final FeedTypeResolver resolver =
-            new FeedTypeResolver();
     private static final String STATE_MACHINE_ARN =
             System.getenv("STATE_MACHINE_ARN");
-    private final ObjectMapper objectMapper =
-            new ObjectMapper();
-    private final SfnClient sfnClient;
+
+    private final FeedTypeResolver resolver;
+    private final ObjectMapper objectMapper;
+    private final WorkflowStarter workflowStarter;
 
     public IngestionHandler() {
-        this(SfnClient.create());
+        this(
+                new FeedTypeResolver(),
+                new ObjectMapper(),
+                new WorkflowStarter(
+                        SfnClient.create(),
+                        STATE_MACHINE_ARN
+                )
+        );
     }
 
-    IngestionHandler(SfnClient sfnClient) {
-        this.sfnClient = sfnClient;
-    }
+    IngestionHandler(
+            FeedTypeResolver resolver,
+            ObjectMapper objectMapper,
+            WorkflowStarter workflowStarter) {
 
-    private final WorkflowStarter workflowStarter =
-            new WorkflowStarter(
-                    SfnClient.create(),
-                    STATE_MACHINE_ARN
-            );
+        this.resolver = resolver;
+        this.objectMapper = objectMapper;
+        this.workflowStarter = workflowStarter;
+    }
 
     @Override
     public IngestionResult handleRequest(
             S3Event event,
             Context context) {
+
         if (event == null
                 || event.getRecords() == null
                 || event.getRecords().isEmpty()) {
@@ -88,6 +95,7 @@ public class IngestionHandler
                         feedType,
                         status
                 );
+
         try {
 
             String workflowInput =
@@ -102,6 +110,7 @@ public class IngestionHandler
                     e
             );
         }
+
         return result;
     }
 }

@@ -1,18 +1,22 @@
 package com.demo.taxreporting.ingestion;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
-import software.amazon.awssdk.services.sfn.SfnClient;
 
-import static org.mockito.Mockito.mock;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
 
 class IngestionHandlerTest {
 
-    private final SfnClient sfnClient =
-            mock(SfnClient.class);
+    private final WorkflowStarter workflowStarter =
+            mock(WorkflowStarter.class);
 
     private final IngestionHandler handler =
-            new IngestionHandler(sfnClient);
+            new IngestionHandler(
+                    new FeedTypeResolver(),
+                    new ObjectMapper(),
+                    workflowStarter
+            );
 
     @Test
     void shouldRejectNullEvent() {
