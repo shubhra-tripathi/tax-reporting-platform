@@ -1,5 +1,5 @@
 resource "aws_iam_role" "ingestion_lambda_role" {
-  name = "tax-reporting-ingestion-lambda-role"
+  name        = "tax-reporting-ingestion-lambda-role"
   description = "Allows Lambda functions to call AWS services on your behalf."
 
   assume_role_policy = jsonencode({

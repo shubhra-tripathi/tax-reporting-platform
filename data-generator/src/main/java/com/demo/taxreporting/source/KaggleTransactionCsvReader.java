@@ -9,13 +9,27 @@ import java.io.Reader;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.stream.Stream;
 
 public class KaggleTransactionCsvReader {
 
+    private static final DateTimeFormatter TIMESTAMP_FORMATTER =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private OffsetDateTime parseTimestamp(String timestamp) {
 
+        LocalDateTime localDateTime =
+                LocalDateTime.parse(
+                        timestamp,
+                        TIMESTAMP_FORMATTER
+                );
+
+        return localDateTime.atOffset(ZoneOffset.UTC);
+    }
 
     public Stream<KaggleTransaction> read(Path path) throws IOException {
 
@@ -37,8 +51,7 @@ public class KaggleTransactionCsvReader {
                         record.get("transaction_id")),
                 Long.parseLong(
                         record.get("customer_id")),
-                OffsetDateTime.parse(
-                        record.get("transaction_timestamp")),
+                parseTimestamp(record.get("transaction_timestamp")),
                 new BigDecimal(
                         record.get("amount")),
                 record.get("merchant_category")
