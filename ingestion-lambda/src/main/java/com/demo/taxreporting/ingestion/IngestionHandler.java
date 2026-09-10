@@ -17,6 +17,15 @@ public class IngestionHandler
             System.getenv("STATE_MACHINE_ARN");
     private final ObjectMapper objectMapper =
             new ObjectMapper();
+    private final SfnClient sfnClient;
+
+    public IngestionHandler() {
+        this(SfnClient.create());
+    }
+
+    IngestionHandler(SfnClient sfnClient) {
+        this.sfnClient = sfnClient;
+    }
 
     private final WorkflowStarter workflowStarter =
             new WorkflowStarter(
